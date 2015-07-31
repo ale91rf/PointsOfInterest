@@ -1,5 +1,22 @@
 <resources>
     <string name="app_name">PointsOfInterest</string>
     <string name="title_activity_maps">Points of interest</string>
+    <string name="title_activity_detail">Information</string>
     <string name="error_downloading">An error occurred while downloading the points of interest</string>
+    <string name="cannot">Could not connect to internet</string>
+    <string name="address">Address:</string>
+    <string name="phone">Phone:</string>
+    <string name="transport">Transport:</string>
+    <string name="not_phone">No Phone</string>
+    <string name="not_transport">No Transport</string>
+    <string name="description">Description</string>
+    <string name="send_email">Send E-mail</string>
+    <string name="not_address">No Address</string>
+    <string name="not_title">No Tittle</string>
+    <string name="to_">To:</string>
+    <string name="subject_">Subject</string>
+    <string name="body_">Body</string>
+    <string name="you_need">you need to write the message body</string>
+    <string name="title_activity_email">Send E-mail</string>
+    <string name="no_email">No email</string>
 </resources>

@@ -14,6 +14,7 @@ public class Constants {
     public static final String ID = "id";
     public static final String TITLE = "title";
     public static final String GEOCOORDINATES = "geocoordinates";
+    public static final String TAG_EMAIL = "email";
 
 
     public static void showToast(Context context, String text){

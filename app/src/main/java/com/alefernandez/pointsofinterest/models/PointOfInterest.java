@@ -11,16 +11,18 @@ public class PointOfInterest {
 
     public int id;
     public String title;
-    public LatLng geocoordinates;
     public String address;
     public String transport;
     public String email;
+    public String geocoordinates;
     public String description;
     public String phone;
 
+    public LatLng geocoordinatesReal;
+
     public PointOfInterest(){};
 
-    public PointOfInterest(int id, String title, LatLng geocoordinates, String address, String transport, String email, String description, String phone) {
+    public PointOfInterest(int id, String title, String address, String transport, String email, String geocoordinates, String description, String phone) {
         this.id = id;
         this.title = title;
         this.geocoordinates = geocoordinates;
@@ -29,6 +31,17 @@ public class PointOfInterest {
         this.email = email;
         this.description = description;
         this.phone = phone;
+
+        geocoordinatesReal = createCoord(this.geocoordinates);
+    }
+
+    private LatLng createCoord(String stringGeo) {
+
+        String latLonSeparate[] = stringGeo.split(",");
+        LatLng mGeoCoor = new LatLng(Double.parseDouble(latLonSeparate[0]), Double.parseDouble(latLonSeparate[1]));
+
+        return mGeoCoor;
+
     }
 
     public int getId() {
@@ -47,12 +60,12 @@ public class PointOfInterest {
         this.title = title;
     }
 
-    public LatLng getGeocoordinates() {
-        return geocoordinates;
+    public LatLng getGeocoordinatesReal() {
+        return geocoordinatesReal;
     }
 
-    public void setGeocoordinates(LatLng geocoordinates) {
-        this.geocoordinates = geocoordinates;
+    public void setGeocoordinatesReal(LatLng geocoordinatesReal) {
+        this.geocoordinatesReal = geocoordinatesReal;
     }
 
     public String getAddress() {
@@ -93,5 +106,14 @@ public class PointOfInterest {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getGeocoordinates() {
+        return geocoordinates;
+    }
+
+    public void setGeocoordinates(String geocoordinates) {
+        this.geocoordinates = geocoordinates;
+        geocoordinatesReal = createCoord(this.geocoordinates);
     }
 }

@@ -1,6 +1,7 @@
 package com.alefernandez.pointsofinterest.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -9,32 +10,26 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.alefernandez.pointsofinterest.R;
-import com.alefernandez.pointsofinterest.models.List;
+import com.alefernandez.pointsofinterest.bbdd.DAO;
 import com.alefernandez.pointsofinterest.models.PointOfInterest;
 import com.alefernandez.pointsofinterest.utils.Constants;
 import com.alefernandez.pointsofinterest.utils.Internet;
 import com.alefernandez.pointsofinterest.volley.App;
-import com.alefernandez.pointsofinterest.volley.GsonArrayRequest;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity {
@@ -43,6 +38,7 @@ public class MapsActivity extends FragmentActivity {
     private RequestQueue mRequestQueue;
     private Internet mConnection;
     private ArrayList<PointOfInterest> mPointsOfInterest;
+    private Intent i;
 
 
     @Override
@@ -104,6 +100,8 @@ public class MapsActivity extends FragmentActivity {
 
                 if(mConnection != null & mConnection.isConnectionAvailable()){
                     sendRequest();
+                }else{
+                    setUpMap();
                 }
             }
         }
@@ -129,7 +127,6 @@ public class MapsActivity extends FragmentActivity {
         final Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Constants.showToast(getApplicationContext(), getString(R.string.error_downloading));
                 Log.e("ERROR VOLLEY", error.toString());
             }
         };
@@ -167,12 +164,7 @@ public class MapsActivity extends FragmentActivity {
                     PointOfInterest mPoi = new PointOfInterest();
                     mPoi.setId(mChild.getInt(Constants.ID));
                     mPoi.setTitle(mChild.getString(Constants.TITLE));
-
-                    String latLong = mChild.getString(Constants.GEOCOORDINATES);
-                    String latLonSeparate[] = latLong.split(",");
-                    LatLng mGeoCoor = new LatLng(Double.parseDouble(latLonSeparate[0]), Double.parseDouble(latLonSeparate[1]));
-
-                    mPoi.setGeocoordinates(mGeoCoor);
+                    mPoi.setGeocoordinates(mChild.getString(Constants.GEOCOORDINATES));
 
                     pointOfInterestList.add(mPoi);
 
@@ -194,9 +186,22 @@ public class MapsActivity extends FragmentActivity {
 
         if(mPointsOfInterest != null){
             for(PointOfInterest point : mPointsOfInterest){
-                mMap.addMarker(new MarkerOptions().position(point.getGeocoordinates()).title(point.getTitle()));
+                mMap.addMarker(new MarkerOptions().position(point.getGeocoordinatesReal())
+                        .title(point.getTitle()).snippet(String.valueOf(point.getId())));
+
+                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(Marker marker) {
+                        i = new Intent(getApplicationContext(), DetailPoi.class);
+                        i.putExtra(Constants.ID, Integer.valueOf(marker.getSnippet()));
+                        startActivity(i);
+                    }
+                });
+
             }
         }
+
+
 
     }
 
