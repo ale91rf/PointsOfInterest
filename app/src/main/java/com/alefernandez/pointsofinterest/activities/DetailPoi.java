@@ -89,19 +89,18 @@ public class DetailPoi extends Activity {
         mDao.close();
 
         if(mPointOfInterestBD != null){
-            Constants.showToast(getApplicationContext(), "El id: " + String.valueOf(id) + " estaba guardado ya");
             mStored = true;
             //If it was stored, paint it.
             paintView(mPointOfInterestBD);
         }else{
             //If it was not stored, we send the request
-            Constants.showToast(getApplicationContext(), "El id: " + String.valueOf(id) + " No esta guardado aun");
             mStored = false;
 
             if(mConnection != null & mConnection.isConnectionAvailable()){
                 sendRequest(id);
             }else{
                 Constants.showToast(getApplicationContext(), getString(R.string.cannot));
+                pbLoading.setVisibility(View.GONE);
             }
         }
     }
@@ -183,6 +182,18 @@ public class DetailPoi extends Activity {
                         }
                     }
                 });
+
+            //We save the data in the DB
+            if(!mStored){
+                if(mDao == null){
+                    mDao = new DAO(getApplicationContext());
+                }
+                mDao.open();
+
+                mDao.insertPoi(mPointOfInterest);
+
+                mDao.close();
+            }
 
         }
     }
