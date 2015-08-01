@@ -8,9 +8,11 @@ import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.SearchView;
 
 import com.alefernandez.pointsofinterest.R;
-import com.alefernandez.pointsofinterest.bbdd.DAO;
 import com.alefernandez.pointsofinterest.models.PointOfInterest;
 import com.alefernandez.pointsofinterest.utils.Constants;
 import com.alefernandez.pointsofinterest.utils.Internet;
@@ -31,14 +33,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class MapsActivity extends FragmentActivity {
+public class MapsActivity extends FragmentActivity implements SearchView.OnQueryTextListener{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private RequestQueue mRequestQueue;
     private Internet mConnection;
     private ArrayList<PointOfInterest> mPointsOfInterest;
     private Intent i;
+    private SearchView mSearchView;
+    private ArrayList<PointOfInterest> mPointOfInterestSearch;
+    private ArrayList<Marker> mMarkers;
 
 
     @Override
@@ -185,24 +192,32 @@ public class MapsActivity extends FragmentActivity {
     private void setUpMap() {
 
         if(mPointsOfInterest != null){
-            for(PointOfInterest point : mPointsOfInterest){
-                mMap.addMarker(new MarkerOptions().position(point.getGeocoordinatesReal())
-                        .title(point.getTitle()).snippet(String.valueOf(point.getId())));
+            paintPoints();
+        }
 
-                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        i = new Intent(getApplicationContext(), DetailPoi.class);
-                        i.putExtra(Constants.ID, Integer.valueOf(marker.getSnippet()));
-                        startActivity(i);
-                    }
-                });
+    }
 
-            }
+    public void paintPoints(){
+
+        mMarkers = new ArrayList<>();
+        for(PointOfInterest point : mPointsOfInterest){
+
+            Marker marker = mMap.addMarker(new MarkerOptions().position(point.getGeocoordinatesReal())
+                    .title(point.getTitle()).snippet(String.valueOf(point.getId())));
+
+            mMarkers.add(marker);
+
         }
 
 
-
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                i = new Intent(getApplicationContext(), DetailPoi.class);
+                i.putExtra(Constants.ID, Integer.valueOf(marker.getSnippet()));
+                startActivity(i);
+            }
+        });
     }
 
     @Override
@@ -212,4 +227,69 @@ public class MapsActivity extends FragmentActivity {
             mRequestQueue.cancelAll(Constants.TAG_REQUESTS);
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) searchItem.getActionView();
+        mSearchView.setQueryHint(getString(R.string.search_menu));
+        mSearchView.setOnQueryTextListener(this);
+
+
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String newText) {
+
+        paintMatches(newText);
+
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        paintMatches(newText);
+
+        return false;
+    }
+
+
+    public void paintMatches(String newText){
+        mPointOfInterestSearch = new ArrayList<>();
+
+        Pattern regex = Pattern.compile(newText, Pattern.CASE_INSENSITIVE);
+
+        for(PointOfInterest p: mPointsOfInterest){
+            Matcher matches = regex.matcher(p.getTitle());
+            if (matches.find()){
+                mPointOfInterestSearch.add(p);
+
+            }
+        }
+
+        if(mPointOfInterestSearch.size() > 0){
+            if(mMarkers != null){
+                for(Marker m: mMarkers){
+                    if(m.getTitle().toString().equals(mPointOfInterestSearch.get(0).getTitle().toString())){
+                        zoomMarker(m);
+                        break;
+                    }
+                }
+            }
+
+        }
+    }
+
+    private void zoomMarker(Marker m) {
+        m.showInfoWindow();
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(m.getPosition()));
+
+        // Zoom in the Google Map
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+    }
+
 }

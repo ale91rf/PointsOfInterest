@@ -19,4 +19,6 @@
     <string name="you_need">you need to write the message body</string>
     <string name="title_activity_email">Send E-mail</string>
     <string name="no_email">No email</string>
+    <string name="search">Search</string>
+    <string name="search_menu">Search...</string>
 </resources>
