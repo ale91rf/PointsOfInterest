@@ -244,10 +244,12 @@ public class MapsActivity extends FragmentActivity implements SearchView.OnQuery
     @Override
     public boolean onQueryTextSubmit(String newText) {
 
-        paintMatches(newText);
+        paintMatchesSubmit(newText);
 
         return false;
     }
+
+
 
     @Override
     public boolean onQueryTextChange(String newText) {
@@ -281,6 +283,35 @@ public class MapsActivity extends FragmentActivity implements SearchView.OnQuery
                 }
             }
 
+        }
+    }
+
+    private void paintMatchesSubmit(String newText) {
+
+        mPointOfInterestSearch = new ArrayList<>();
+
+        Pattern regex = Pattern.compile(newText, Pattern.CASE_INSENSITIVE);
+
+        for(PointOfInterest p: mPointsOfInterest){
+            Matcher matches = regex.matcher(p.getTitle());
+            if (matches.find()){
+                mPointOfInterestSearch.add(p);
+
+            }
+        }
+
+        if(mPointOfInterestSearch.size() > 0){
+            if(mMarkers != null){
+                for(Marker m: mMarkers){
+                    if(m.getTitle().toString().equals(mPointOfInterestSearch.get(0).getTitle().toString())){
+                        zoomMarker(m);
+                        break;
+                    }
+                }
+            }
+
+        }else{
+            Constants.showToast(getApplicationContext(), getString(R.string.no_matches) +" "+ newText);
         }
     }
 
