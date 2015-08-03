@@ -91,19 +91,22 @@ public class MapsActivity extends FragmentActivity implements SearchView.OnQuery
                 // set map type
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-                // Get latitude of the current location
-                double latitude = myLocation.getLatitude();
+                if(myLocation != null){
+                    // Get latitude of the current location
+                    double latitude = myLocation.getLatitude();
 
-                // Get longitude of the current location
-                double longitude = myLocation.getLongitude();
+                    // Get longitude of the current location
+                    double longitude = myLocation.getLongitude();
 
-                // Create a LatLng object for the current location
-                LatLng latLng = new LatLng(latitude, longitude);
-                // Show the current location in Google Map
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    // Create a LatLng object for the current location
+                    LatLng latLng = new LatLng(latitude, longitude);
+                    // Show the current location in Google Map
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
-                // Zoom in the Google Map
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+                    // Zoom in the Google Map
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+                }
+
 
                 if(mConnection != null & mConnection.isConnectionAvailable()){
                     sendRequest();
@@ -244,7 +247,10 @@ public class MapsActivity extends FragmentActivity implements SearchView.OnQuery
     @Override
     public boolean onQueryTextSubmit(String newText) {
 
-        paintMatchesSubmit(newText);
+        if(mPointsOfInterest != null){
+            paintMatchesSubmit(newText);
+        }
+
 
         return false;
     }
@@ -254,7 +260,10 @@ public class MapsActivity extends FragmentActivity implements SearchView.OnQuery
     @Override
     public boolean onQueryTextChange(String newText) {
 
-        paintMatches(newText);
+        if(mPointsOfInterest != null){
+            paintMatches(newText);
+        }
+
 
         return false;
     }
@@ -264,6 +273,7 @@ public class MapsActivity extends FragmentActivity implements SearchView.OnQuery
         mPointOfInterestSearch = new ArrayList<>();
 
         Pattern regex = Pattern.compile(newText, Pattern.CASE_INSENSITIVE);
+
 
         for(PointOfInterest p: mPointsOfInterest){
             Matcher matches = regex.matcher(p.getTitle());
